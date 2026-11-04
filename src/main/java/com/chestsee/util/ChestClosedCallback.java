@@ -2,19 +2,19 @@ package com.chestsee.util;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.world.entity.ContainerUser;
+import net.minecraft.entity.player.PlayerEntity;
 
 @FunctionalInterface
 public interface ChestClosedCallback
 {
-    void invoke(ContainerUser user);
+    void invoke(PlayerEntity player);
 
     Event<ChestClosedCallback> EVENT = EventFactory.createArrayBacked(ChestClosedCallback.class,
-            (listeners) -> (user) ->
+            (listeners) -> (player) ->
             {
                 for (ChestClosedCallback listener : listeners)
                 {
-                    listener.invoke(user);
+                    listener.invoke(player);
                 }
             });
 }

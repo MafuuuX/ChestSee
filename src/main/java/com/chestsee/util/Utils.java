@@ -1,17 +1,17 @@
 package com.chestsee.util;
 
 import com.chestsee.ChestSee;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.entity.*;
-import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.entity.*;
+import net.minecraft.block.enums.ChestType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionTypes;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,48 +27,48 @@ public class Utils
         return String.format("[%s]", dtf.format(LocalDateTime.now()));
     }
 
-    public static String getDimString(Holder<DimensionType> dimensionTypeHolder)
+    public static String getDimString(RegistryEntry<DimensionType> dimensionTypeRegistryEntry)
     {
         String dimStr = "unkown";
-        if(dimensionTypeHolder.is(BuiltinDimensionTypes.OVERWORLD))
+        if(dimensionTypeRegistryEntry.matchesKey(DimensionTypes.OVERWORLD))
             dimStr = "Overworld";
-        else if(dimensionTypeHolder.is(BuiltinDimensionTypes.NETHER))
+        else if(dimensionTypeRegistryEntry.matchesKey(DimensionTypes.THE_NETHER))
             dimStr = "The Nether";
-        else if(dimensionTypeHolder.is(BuiltinDimensionTypes.END))
+        else if(dimensionTypeRegistryEntry.matchesKey(DimensionTypes.THE_END))
             dimStr = "The End";
         return dimStr;
     }
 
-    public static ChestBlockEntity getSecondChest(BlockState blockState, BlockEntity blockEntity, Level world)
+    public static ChestBlockEntity getSecondChest(BlockState blockState, BlockEntity blockEntity, World world)
     {
         if (!(blockEntity instanceof ChestBlockEntity)) return null;
-        Direction facingDirection = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        Direction facingDirection = blockState.get(Properties.HORIZONTAL_FACING);
 
-        ChestType chestType = blockState.getValue(ChestBlock.TYPE);
+        ChestType chestType = blockState.get(ChestBlock.CHEST_TYPE);
         switch (chestType)
         {
             case LEFT:
-                if (facingDirection == Direction.EAST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().south());
-                else if (facingDirection == Direction.SOUTH) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().west());
-                else if (facingDirection == Direction.WEST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().north());
-                else return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().east());
+                if (facingDirection == Direction.EAST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().south());
+                else if (facingDirection == Direction.SOUTH) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().west());
+                else if (facingDirection == Direction.WEST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().north());
+                else return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().east());
             case RIGHT:
-                if (facingDirection == Direction.EAST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().north());
-                else if (facingDirection == Direction.SOUTH) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().east());
-                else if (facingDirection == Direction.WEST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().south());
-                else return (ChestBlockEntity) world.getBlockEntity(blockEntity.getBlockPos().west());
+                if (facingDirection == Direction.EAST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().north());
+                else if (facingDirection == Direction.SOUTH) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().east());
+                else if (facingDirection == Direction.WEST) return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().south());
+                else return (ChestBlockEntity) world.getBlockEntity(blockEntity.getPos().west());
             default:
                 return null;
         }
     }
 
-    public static List<ItemStack> getItems(RandomizableContainerBlockEntity blockEntity)
+    public static List<ItemStack> getItems(LootableContainerBlockEntity blockEntity)
     {
         List<ItemStack> itemStacks = new ArrayList<>();
 
-        for(int i = 0; i < blockEntity.getContainerSize(); i++)
+        for(int i = 0; i < blockEntity.size(); i++)
         {
-            ItemStack itemStack = blockEntity.getItem(i);
+            ItemStack itemStack = blockEntity.getStack(i);
             if(!itemStack.isEmpty())
             {
                 itemStacks.add(itemStack);
@@ -85,7 +85,7 @@ public class Utils
 
             logStr = timeStamp + " " + playerName + "\nItems Added: " + itemsAdded + "\nItems Removed: " + itemsRemoved + "\n\n";
 
-            FileWriter fileWriter = new FileWriter(path + ".txt", true);
+            FileWriter fileWriter = new FileWriter(path, true);
             fileWriter.write(logStr);
             fileWriter.close();
         } catch (IOException e)
@@ -103,7 +103,7 @@ public class Utils
 
             logStr = timeStamp + " " + playerName + "\n" + message + "\n\n";
 
-            FileWriter fileWriter = new FileWriter(path + ".txt", true);
+            FileWriter fileWriter = new FileWriter(path, true);
             fileWriter.write(logStr);
             fileWriter.close();
         } catch (IOException e) {
