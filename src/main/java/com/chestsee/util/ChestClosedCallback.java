@@ -2,7 +2,7 @@ package com.chestsee.util;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.world.entity.ContainerUser;
+import net.minecraft.entity.ContainerUser;
 
 @FunctionalInterface
 public interface ChestClosedCallback

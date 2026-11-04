@@ -2,12 +2,12 @@ package com.chestsee.util;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.item.ItemPlacementContext;
 
 @FunctionalInterface
 public interface BlockPlaceCallback
 {
-    void invoke(BlockPlaceContext context);
+    void invoke(ItemPlacementContext context);
 
     Event<BlockPlaceCallback> EVENT = EventFactory.createArrayBacked(BlockPlaceCallback.class,
             (listeners) -> (context) ->
