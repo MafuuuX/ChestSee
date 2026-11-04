@@ -3,7 +3,7 @@
 	"id": "chestsee",
 	"version": "${version}",
 	"name": "ChestSee",
-	"description": "Logs every chest, barrel and shulker box on your server so you can catch thieves.",
+	"description": "Logs every chest, barrel, furnace and other container on your server so you can catch thieves.",
 	"authors": [
 		"MafuuuX"
 	],
