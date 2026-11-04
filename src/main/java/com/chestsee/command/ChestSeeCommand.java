@@ -3,6 +3,7 @@ package com.chestsee.command;
 import com.chestsee.ChestSee;
 import com.chestsee.log.LogEntry;
 import com.chestsee.log.LogReader;
+import com.chestsee.permission.ChestSeePermissions;
 import com.chestsee.util.Utils;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -45,10 +46,12 @@ public class ChestSeeCommand
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
 	{
 		dispatcher.register(Commands.literal("chestsee")
-			.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+			.requires(ChestSeePermissions::canUseAny)
 			.then(Commands.literal("inspect")
+				.requires(ChestSeePermissions::canInspect)
 				.executes(ChestSeeCommand::inspect))
 			.then(Commands.literal("lookup")
+				.requires(ChestSeePermissions::canLookup)
 				.then(Commands.argument("pos", BlockPosArgument.blockPos())
 					.executes(ctx -> lookup(ctx, 1, ctx.getSource().getLevel()))
 					.then(Commands.argument("page", IntegerArgumentType.integer(1))
@@ -56,12 +59,14 @@ public class ChestSeeCommand
 						.then(Commands.argument("dimension", DimensionArgument.dimension())
 							.executes(ctx -> lookup(ctx, IntegerArgumentType.getInteger(ctx, "page"), DimensionArgument.getDimension(ctx, "dimension")))))))
 			.then(Commands.literal("player")
+				.requires(ChestSeePermissions::canSearchPlayers)
 				.then(Commands.argument("name", StringArgumentType.word())
 					.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(ctx.getSource().getOnlinePlayerNames(), builder))
 					.executes(ctx -> player(ctx, 1))
 					.then(Commands.argument("page", IntegerArgumentType.integer(1))
 						.executes(ctx -> player(ctx, IntegerArgumentType.getInteger(ctx, "page"))))))
 			.then(Commands.literal("reload")
+				.requires(ChestSeePermissions::canReload)
 				.executes(ChestSeeCommand::reload)));
 	}
 
