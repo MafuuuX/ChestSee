@@ -3,10 +3,8 @@
   "package": "com.chestsee.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BarrelBlockEntityMixin",
-    "ChestBlockEntityMixin",
-    "ShulkerBoxBlockEntityMixin",
-    "PlayerPlaceBlock"
+    "PlayerPlaceBlock",
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
