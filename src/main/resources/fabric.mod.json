@@ -26,6 +26,10 @@
 	"depends": {
 		"fabricloader": ">=0.19.2",
 		"fabric-api": "*",
+		"fabric-permissions-api-v0": "*",
 		"minecraft": ">=26.1.2"
+	},
+	"suggests": {
+		"luckperms": "*"
 	}
 }
