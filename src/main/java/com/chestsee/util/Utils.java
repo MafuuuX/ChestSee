@@ -1,10 +1,12 @@
 package com.chestsee.util;
 
 import com.chestsee.ChestSee;
+import com.chestsee.log.LogMaintenance;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.state.property.Properties;
@@ -13,6 +15,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -62,13 +65,13 @@ public class Utils
         }
     }
 
-    public static List<ItemStack> getItems(LootableContainerBlockEntity blockEntity)
+    public static List<ItemStack> getItems(Inventory container)
     {
         List<ItemStack> itemStacks = new ArrayList<>();
 
-        for(int i = 0; i < blockEntity.size(); i++)
+        for(int i = 0; i < container.size(); i++)
         {
-            ItemStack itemStack = blockEntity.getStack(i);
+            ItemStack itemStack = container.getStack(i);
             if(!itemStack.isEmpty())
             {
                 itemStacks.add(itemStack);
@@ -85,9 +88,7 @@ public class Utils
 
             logStr = timeStamp + " " + playerName + "\nItems Added: " + itemsAdded + "\nItems Removed: " + itemsRemoved + "\n\n";
 
-            FileWriter fileWriter = new FileWriter(path, true);
-            fileWriter.write(logStr);
-            fileWriter.close();
+            append(path, logStr);
         } catch (IOException e)
         {
             ChestSee.LOGGER.error("Error writing log");
@@ -103,13 +104,24 @@ public class Utils
 
             logStr = timeStamp + " " + playerName + "\n" + message + "\n\n";
 
-            FileWriter fileWriter = new FileWriter(path, true);
-            fileWriter.write(logStr);
-            fileWriter.close();
+            append(path, logStr);
         } catch (IOException e) {
             ChestSee.LOGGER.error("Error writing log");
             e.printStackTrace();
         }
+    }
+
+    private static void append(String path, String logStr) throws IOException
+    {
+        File file = new File(path + ".txt");
+        try(FileWriter fileWriter = new FileWriter(file, true))
+        {
+            fileWriter.write(logStr);
+        }
+
+        int maxKb = ChestSee.getConfig().maxFileSizeKb;
+        if(maxKb > 0)
+            LogMaintenance.trimToSize(file.toPath(), maxKb * 1024L);
     }
 
     public static List<String> itemStackListToStrList(List<ItemStack> items)
