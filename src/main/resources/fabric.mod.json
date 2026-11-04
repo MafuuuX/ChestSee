@@ -3,7 +3,7 @@
 	"id": "chestsee",
 	"version": "${version}",
 	"name": "ChestSee",
-	"description": "Logs every chest, barrel and shulker box on your server so you can catch thieves.",
+	"description": "Logs every chest, barrel, furnace and other container on your server so you can catch thieves.",
 	"authors": [
 		"MafuuuX"
 	],
@@ -26,6 +26,10 @@
 	"depends": {
 		"fabricloader": ">=0.19.2",
 		"fabric": "*",
+		"fabric-permissions-api-v0": "*",
 		"minecraft": ">=1.21.11"
+	},
+	"suggests": {
+		"luckperms": "*"
 	}
 }
