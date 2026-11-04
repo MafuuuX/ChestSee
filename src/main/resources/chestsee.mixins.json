@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.chestsee.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "BarrelBlockEntityMixin",
+    "ChestBlockEntityMixin",
+    "ShulkerBoxBlockEntityMixin",
+    "PlayerPlaceBlock"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "chestsee",
+	"version": "${version}",
+	"name": "ChestSee",
+	"description": "Logs every chest, barrel and shulker box on your server so you can catch thieves.",
+	"authors": [
+		"MafuuuX"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/chestsee-chestlogger",
+		"sources": "https://github.com/MafuuuX/ChestSee",
+		"issues": "https://github.com/MafuuuX/ChestSee/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/chestsee/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.chestsee.ChestSee"
+		]
+	},
+	"mixins": [
+		"chestsee.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"fabric-api": "*",
+		"minecraft": ">=26.2"
+	}
+}
