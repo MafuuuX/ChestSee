@@ -7,17 +7,17 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.block.entity.LootableContainerBlockEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.WorldSavePath;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +37,10 @@ public class ChestSee implements ModInitializer
 	{
 		ServerLifecycleEvents.SERVER_STARTED.register((server ->
 		{
-			folderPaths.add(server.getWorldPath(LevelResource.ROOT).resolve("ChestLog").toString());
-			folderPaths.add(server.getWorldPath(LevelResource.ROOT).resolve("ChestLog" + File.separator + "Overworld").toString());
-			folderPaths.add(server.getWorldPath(LevelResource.ROOT).resolve("ChestLog" + File.separator + "The Nether").toString());
-			folderPaths.add(server.getWorldPath(LevelResource.ROOT).resolve("ChestLog" + File.separator + "The End").toString());
+			folderPaths.add(server.getSavePath(WorldSavePath.ROOT).resolve("ChestLog").toString());
+			folderPaths.add(server.getSavePath(WorldSavePath.ROOT).resolve("ChestLog" + File.separator + "Overworld").toString());
+			folderPaths.add(server.getSavePath(WorldSavePath.ROOT).resolve("ChestLog" + File.separator + "The Nether").toString());
+			folderPaths.add(server.getSavePath(WorldSavePath.ROOT).resolve("ChestLog" + File.separator + "The End").toString());
 
 			for(String folderPath : folderPaths)
 			{
@@ -63,16 +63,16 @@ public class ChestSee implements ModInitializer
 			BlockEntity blockEntity = world.getBlockEntity(blockPos);
 			ChestBlockEntity secondChest = Utils.getSecondChest(blockState, blockEntity, world);
 
-			if(!(blockEntity instanceof RandomizableContainerBlockEntity))
-				return InteractionResult.PASS;
+			if(!(blockEntity instanceof LootableContainerBlockEntity))
+				return ActionResult.PASS;
 
 			String blockstr = block.getName().getString();
 
-			String dimStr = Utils.getDimString(world.dimensionTypeRegistration());
+			String dimStr = Utils.getDimString(world.getDimensionEntry());
 
 			AtomicReference<String> savePath = new AtomicReference<>(folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ());
 
-			List<ItemStack> itemsBefore = Utils.getItems((RandomizableContainerBlockEntity) blockEntity);
+			List<ItemStack> itemsBefore = Utils.getItems((LootableContainerBlockEntity) blockEntity);
 			if(secondChest != null)
 				itemsBefore.addAll(Utils.getItems(secondChest));
 			List<String> itemsBeforeStr = Utils.itemStackListToStrList(itemsBefore);
@@ -91,7 +91,7 @@ public class ChestSee implements ModInitializer
 					}
 				}
 
-				List<ItemStack> itemsAfter = Utils.getItems((RandomizableContainerBlockEntity) blockEntity);
+				List<ItemStack> itemsAfter = Utils.getItems((LootableContainerBlockEntity) blockEntity);
 				if(secondChest != null)
 					itemsAfter.addAll(Utils.getItems(secondChest));
 				List<String> itemsAfterStr = Utils.itemStackListToStrList(itemsAfter);
@@ -104,27 +104,27 @@ public class ChestSee implements ModInitializer
 				{
 					Utils.writeLog(timeStamp, player.getName().getString(), savePath.get(), itemsAdded, itemsRemoved);
 					if (secondChest != null) {
-						savePath.set(folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + secondChest.getBlockPos().getX() + " " + secondChest.getBlockPos().getY() + " " + secondChest.getBlockPos().getZ());
+						savePath.set(folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + secondChest.getPos().getX() + " " + secondChest.getPos().getY() + " " + secondChest.getPos().getZ());
 						Utils.writeLog(timeStamp, player.getName().getString(), savePath.get(), itemsAdded, itemsRemoved);
 					}
 				}
 			});
-			return InteractionResult.PASS;
+			return ActionResult.PASS;
 		});
 
 		ChestClosedCallback.EVENT.register((user ->
 		{
-			chestClosedBy = user.getLivingEntity().getName().toString();
+			chestClosedBy = user.asLivingEntity().getName().toString();
 		}));
 
 		PlayerBlockBreakEvents.BEFORE.register((world, player, blockPos, blockState, blockEntity) ->
 		{
 			Block block = blockState.getBlock();
-			if(!(blockEntity instanceof RandomizableContainerBlockEntity))
+			if(!(blockEntity instanceof LootableContainerBlockEntity))
 				return true;
 
 			String blockstr = block.getName().getString();
-			String dimStr = Utils.getDimString(world.dimensionTypeRegistration());
+			String dimStr = Utils.getDimString(world.getDimensionEntry());
 			String savePath = folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
 
 			Utils.writeMessageLog(Utils.getTimeStamp(), player.getName().getString(), savePath, "Broke " + blockstr);
@@ -132,26 +132,26 @@ public class ChestSee implements ModInitializer
 		});
 
 		BlockPlaceCallback.EVENT.register((context -> {
-			Level world = context.getLevel();
-			BlockPos blockPos = context.getClickedPos();
+			World world = context.getWorld();
+			BlockPos blockPos = context.getBlockPos();
 			BlockState blockState = world.getBlockState(blockPos);
 
 			if(blockState.getBlock() == Blocks.HOPPER)
 			{
-				BlockPos chestPos = blockPos.offset(0, 1, 0);
-				if(!(world.getBlockEntity(chestPos) instanceof RandomizableContainerBlockEntity))
+				BlockPos chestPos = blockPos.add(0, 1, 0);
+				if(!(world.getBlockEntity(chestPos) instanceof LootableContainerBlockEntity))
 					return;
 				BlockState chestState = world.getBlockState(chestPos);
 				ChestBlockEntity secondChest = Utils.getSecondChest(chestState, world.getBlockEntity(chestPos), world);
 
 				String blockstr = chestState.getBlock().getName().getString();
-				String dimStr = Utils.getDimString(world.dimensionTypeRegistration());
+				String dimStr = Utils.getDimString(world.getDimensionEntry());
 				String savePath = folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + chestPos.getX() + " " + chestPos.getY() + " " + chestPos.getZ();
 
 				Utils.writeMessageLog(Utils.getTimeStamp(), context.getPlayer().getName().getString(), savePath, "Placed Hopper underneath container");
 				if(secondChest != null)
 				{
-					savePath = folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + secondChest.getBlockPos().getX() + " " + secondChest.getBlockPos().getY() + " " + secondChest.getBlockPos().getZ();
+					savePath = folderPaths.get(0) + File.separator + dimStr + File.separator + blockstr + " " + secondChest.getPos().getX() + " " + secondChest.getPos().getY() + " " + secondChest.getPos().getZ();
 					Utils.writeMessageLog(Utils.getTimeStamp(), context.getPlayer().getName().getString(), savePath, "Placed Hopper underneath container");
 				}
 			}
