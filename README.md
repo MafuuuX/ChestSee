@@ -17,7 +17,7 @@ Double chests are logged for both halves. For furnaces and brewing stands only w
 
 ## Commands
 
-All commands need OP level 2.
+Commands need OP level 2, or the LuckPerms nodes below.
 
 | Command | What it does |
 |---------|--------------|
@@ -27,6 +27,21 @@ All commands need OP level 2.
 | `/chestsee reload` | Reload the config |
 
 Everything also works from the server console and RCON.
+
+## Permissions
+
+LuckPerms is optional. ChestSee uses the [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) and falls back to OP level 2 if no permission mod is installed.
+
+| Node | Access |
+|------|--------|
+| `chestsee.inspect` | `/chestsee inspect` |
+| `chestsee.lookup` | `/chestsee lookup` |
+| `chestsee.player` | `/chestsee player` |
+| `chestsee.reload` | `/chestsee reload` |
+
+```
+/lp group moderator permission set chestsee.lookup true
+```
 
 ## Where the logs are
 
